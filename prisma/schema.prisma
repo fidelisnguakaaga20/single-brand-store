@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String?
+  role         UserRole @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model Collection {
+  id          Int                   @id @default(autoincrement())
+  name        String
+  slug        String                @unique
+  description String?
+  heroImage   String?
+  isFeatured  Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  products    ProductOnCollection[]
+}
+
+model Product {
+  id               Int                   @id @default(autoincrement())
+  name             String
+  slug             String                @unique
+  description      String?
+  tagLine          String?
+  basePrice        Int
+  currency         String                @default("USD")
+  isNew            Boolean               @default(false)
+  isBestSeller     Boolean               @default(false)
+  isLimitedEdition Boolean               @default(false)
+  onSale           Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  orderItems       OrderItem[]
+  collections      ProductOnCollection[]
+  tags             ProductTag[]
+  variants         ProductVariant[]
+}
+
+model ProductVariant {
+  id         Int         @id @default(autoincrement())
+  productId  Int
+  sku        String      @unique
+  size       String
+  color      String
+  price      Int
+  stock      Int
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  orderItems OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id])
+}
+
+model ProductOnCollection {
+  productId    Int
+  collectionId Int
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  product      Product    @relation(fields: [productId], references: [id])
+
+  @@id([productId, collectionId])
+}
+
+model Tag {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  slug      String       @unique
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  products  ProductTag[]
+}
+
+model ProductTag {
+  productId Int
+  tagId     Int
+  product   Product @relation(fields: [productId], references: [id])
+  tag       Tag     @relation(fields: [tagId], references: [id])
+
+  @@id([productId, tagId])
+}
+
+model Promotion {
+  id             Int           @id @default(autoincrement())
+  code           String        @unique
+  type           PromotionType
+  value          Int
+  minOrderAmount Int?
+  startsAt       DateTime?
+  endsAt         DateTime?
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  orders         Order[]
+}
+
+model Order {
+  id                    Int         @id @default(autoincrement())
+  userId                String?
+  status                OrderStatus @default(PLACED)
+  total                 Int
+  currency              String      @default("USD")
+  promotionId           Int?
+  stripePaymentIntentId String?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  promotion             Promotion?  @relation(fields: [promotionId], references: [id])
+  user                  User?       @relation(fields: [userId], references: [id])
+  items                 OrderItem[]
+}
+
+model OrderItem {
+  id        Int             @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  variantId Int?
+  quantity  Int
+  unitPrice Int
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  order     Order           @relation(fields: [orderId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+enum OrderStatus {
+  PLACED
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
