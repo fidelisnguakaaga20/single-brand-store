@@ -29,8 +29,7 @@ const variants = {
     transition: {
       duration: 0.35,
       delay: i * 0.04,
-      // TS FIX ONLY: cast the cubic-bezier array
-      ease: [0.16, 1, 0.3, 1] as any,
+      ease: [0.16, 1, 0.3, 1],
     },
   }),
 };
@@ -53,7 +52,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   return (
     <motion.article
       className="group flex flex-col rounded-3xl border border-slate-800 bg-slate-900/40 overflow-hidden hover:border-fuchsia-500/60 transition-colors"
-      variants={variants}
+      // TS FIX ONLY: tell TS not to complain about variants shape
+      variants={variants as any}
       initial="hidden"
       animate="visible"
       custom={index}
@@ -121,6 +121,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     </motion.article>
   );
 }
+
+
 
 // "use client";
 

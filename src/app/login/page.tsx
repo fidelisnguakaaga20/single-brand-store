@@ -127,7 +127,7 @@ function LoginPageInner() {
 }
 
 export default function LoginPage() {
-  // Suspense wrapper required by Next 16 for useSearchParams
+  // Required by Next 16 when using useSearchParams in a client page
   return (
     <Suspense fallback={null}>
       <LoginPageInner />
