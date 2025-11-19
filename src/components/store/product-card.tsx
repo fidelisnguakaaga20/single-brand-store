@@ -29,7 +29,7 @@ const variants = {
     transition: {
       duration: 0.35,
       delay: i * 0.04,
-      ease: "easeOut",
+      ease: [0.16, 1, 0.3, 1]
     },
   }),
 };
