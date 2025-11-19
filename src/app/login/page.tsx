@@ -127,14 +127,9 @@ function LoginPageInner() {
 }
 
 export default function LoginPage() {
+  // Suspense wrapper required by Next 16 for useSearchParams
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 text-sm text-gray-500">
-          Loading login…
-        </div>
-      }
-    >
+    <Suspense fallback={null}>
       <LoginPageInner />
     </Suspense>
   );

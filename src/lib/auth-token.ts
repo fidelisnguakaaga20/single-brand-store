@@ -7,11 +7,7 @@ const JWT_SECRET = new TextEncoder().encode(
 
 export type UserRole = "CUSTOMER" | "ADMIN";
 
-/**
- * Extend JWTPayload so TypeScript is happy to pass this into SignJWT.
- * This does NOT change runtime behaviour, it only satisfies the type system.
- */
-export interface AuthTokenPayload extends JWTPayload {
+export interface AuthTokenPayload {
   userId: string;
   role: UserRole;
 }
@@ -19,7 +15,8 @@ export interface AuthTokenPayload extends JWTPayload {
 export async function createAuthToken(
   payload: AuthTokenPayload
 ): Promise<string> {
-  return await new SignJWT(payload)
+  // TS FIX ONLY: cast payload to JWTPayload for typing
+  return await new SignJWT(payload as JWTPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
